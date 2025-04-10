@@ -13,7 +13,7 @@ except ImportError as e:
 
 
 # Cargar el modelo de IA
-model = load_model('model/modelo_entrenado.keras')
+model = load_model('model/yolov8n.pt')
 
 # Función para detectar PPE (cascos, guantes, chalecos)
 def detect_ppe(image):
