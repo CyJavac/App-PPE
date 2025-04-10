@@ -5,7 +5,7 @@ from PIL import Image
 from ultralytics import YOLO  # Importar YOLOv8 desde ultralytics
 
 # Cargar el modelo de IA YOLOv8
-model = YOLO('model/modelo_entrenado.pt')  # Cargar el modelo entrenado YOLOv8
+model = YOLO('model/yolov8n.pt')  # Cargar el modelo entrenado YOLOv8
 
 # Función para detectar PPE (cascos, guantes, chalecos)
 def detect_ppe(image):
