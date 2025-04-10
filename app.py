@@ -4,8 +4,16 @@ import cv2
 from tensorflow.keras.models import load_model
 from PIL import Image
 
+try:
+    import cv2
+    print("OpenCV se ha importado correctamente")
+except ImportError as e:
+    print(f"Error al importar OpenCV: {e}")
+    raise
+
+
 # Cargar el modelo de IA
-model = load_model('model/detector_model.keras')
+model = load_model('model/modelo_entrenado.keras')
 
 # Función para detectar PPE (cascos, guantes, chalecos)
 def detect_ppe(image):
