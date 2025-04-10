@@ -1,4 +1,6 @@
-flask
+streamlit
 tensorflow
-opencv-python
+ultralytics
+opencv-python-headless  # Usar opencv-python-headless si el entorno no tiene acceso a la GUI
 numpy
+Pillow
