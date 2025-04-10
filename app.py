@@ -5,13 +5,13 @@ from PIL import Image
 from ultralytics import YOLO  # Importar YOLOv8 desde ultralytics
 
 # Cargar el modelo de IA YOLOv8
-model = YOLO('model/modelo_entrenado.pt')  # Cargar el modelo YOLOv8 en formato .pt
+model = YOLO('model/modelo_entrenado.pt')  # Cargar el modelo entrenado YOLOv8
 
 # Función para detectar PPE (cascos, guantes, chalecos)
 def detect_ppe(image):
-    # Preprocesar la imagen
-    img_resized = cv2.resize(image, (640, 640))  # Ajustar el tamaño de la imagen según el modelo
-    img_array = np.expand_dims(img_resized / 255.0, axis=0)
+    # Redimensionar la imagen a 640x640 píxeles (tamaño requerido por YOLOv8)
+    img_resized = cv2.resize(image, (640, 640))  # Ajuste según el modelo YOLOv8
+    img_array = np.expand_dims(img_resized / 255.0, axis=0)  # Normalizar la imagen y añadir un batch dimension
 
     # Inferencia con el modelo
     results = model(img_array)  # Usar el modelo YOLOv8 para hacer la inferencia
