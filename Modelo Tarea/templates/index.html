@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detección SISO</title>
+</head>
+<body>
+    <h2>Sube una foto o usa tu cámara</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="image" accept="image/*" capture="environment">
+        <button type="submit">Procesar</button>
+    </form>
+
+    {% if result %}
+        <h3>Resultado:</h3>
+        <p>{{ result.alert }}</p>
+        <ul>
+            {% for item, status in result.detected.items() %}
+                <li>{{ item }}: {{ '✅' if status else '❌' }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
