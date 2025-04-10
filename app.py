@@ -1,30 +1,27 @@
 import streamlit as st
 import numpy as np
 import cv2
-from tensorflow.keras.models import load_model
 from PIL import Image
+from ultralytics import YOLO  # Importar YOLOv8 desde ultralytics
 
-try:
-    import cv2
-    print("OpenCV se ha importado correctamente")
-except ImportError as e:
-    print(f"Error al importar OpenCV: {e}")
-    raise
-
-
-# Cargar el modelo de IA
-model = load_model('model/modelo_entrenado.pt')
+# Cargar el modelo de IA YOLOv8
+model = YOLO('model/modelo_entrenado.pt')  # Cargar el modelo YOLOv8 en formato .pt
 
 # Función para detectar PPE (cascos, guantes, chalecos)
 def detect_ppe(image):
     # Preprocesar la imagen
-    img_resized = cv2.resize(image, (224, 224))  # Ajusta según tu modelo
+    img_resized = cv2.resize(image, (640, 640))  # Ajustar el tamaño de la imagen según el modelo
     img_array = np.expand_dims(img_resized / 255.0, axis=0)
 
     # Inferencia con el modelo
-    predictions = model.predict(img_array)[0]
+    results = model(img_array)  # Usar el modelo YOLOv8 para hacer la inferencia
+
+    # Extraer resultados de las detecciones
+    detected = {}
     labels = ['persona', 'casco', 'guantes', 'chaleco']
-    detected = {label: bool(round(pred)) for label, pred in zip(labels, predictions)}
+
+    for i, label in enumerate(labels):
+        detected[label] = any([result['class'] == i for result in results.xywh[0]])  # Check if class i is detected
 
     # Generar alerta SISO
     missing = [k for k, v in detected.items() if k != 'persona' and not v]
