@@ -4,19 +4,21 @@ import cv2
 from tensorflow.keras.models import load_model
 from PIL import Image
 
+# Cargar el modelo de IA
 model = load_model('model/detector_model.keras')
 
+# Función para detectar PPE (cascos, guantes, chalecos)
 def detect_ppe(image):
-    # Preprocesar imagen
-    img_resized = cv2.resize(image, (224, 224))  # ajusta según tu modelo
+    # Preprocesar la imagen
+    img_resized = cv2.resize(image, (224, 224))  # Ajusta según tu modelo
     img_array = np.expand_dims(img_resized / 255.0, axis=0)
 
-    # Inferencia
+    # Inferencia con el modelo
     predictions = model.predict(img_array)[0]
     labels = ['persona', 'casco', 'guantes', 'chaleco']
     detected = {label: bool(round(pred)) for label, pred in zip(labels, predictions)}
 
-    # Generar alerta
+    # Generar alerta SISO
     missing = [k for k, v in detected.items() if k != 'persona' and not v]
     if missing:
         alert = f"⚠️ Alerta SISO: falta {' - '.join(missing)}"
@@ -25,7 +27,7 @@ def detect_ppe(image):
 
     return {"detected": detected, "alert": alert}
 
-
+# Configuración de la interfaz Streamlit
 st.title('Detección de PPE en Imágenes')
 
 # Subir imagen
@@ -38,13 +40,13 @@ if uploaded_file is not None:
 
     # Convertir la imagen a formato que OpenCV pueda procesar
     img_array = np.array(image)
-    if img_array.shape[2] == 4:  # si tiene canal alfa, eliminarlo
+    if img_array.shape[2] == 4:  # Si tiene canal alfa, eliminarlo
         img_array = img_array[:, :, :3]
     
-    # Detectar PPE
+    # Llamar a la función para detectar PPE
     result = detect_ppe(img_array)
 
-    # Mostrar resultados
+    # Mostrar los resultados de la detección
     st.subheader("Resultado de la Detección")
     st.write(result['alert'])
     for item, status in result['detected'].items():
