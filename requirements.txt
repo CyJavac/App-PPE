@@ -1,5 +1,4 @@
-opencv-python-headless
+flask
 tensorflow
-streamlit
+opencv-python
 numpy
-Pillow
