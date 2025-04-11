@@ -4,10 +4,12 @@ import numpy as np
 import cv2
 from PIL import Image
 
-# Cargar el modelo
+
+MODEL_PATH = 'model/modelo_entrenado.pt'
+
 @st.cache_resource
 def load_model():
-    return torch.hub.load('ultralytics/yolov5', 'custom', path='model/modelo_entrenado.pt', force_reload=False)
+    return torch.hub.load('ultralytics/yolov5', 'custom', path=MODEL_PATH, force_reload=False)
 
 model = load_model()
 model.conf = 0.5  # confianza mínima
