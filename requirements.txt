@@ -1,4 +1,6 @@
 streamlit
-tensorflow
-ultralytics
-opencv-python-headless  # Usar opencv-python-headless si el entorno no tiene acceso a la GUI
+torch
+torchvision
+numpy
+opencv-python-headless
+Pillow
