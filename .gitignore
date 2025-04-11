@@ -1,4 +1,1 @@
-*.keras
-__pycache__/
-*.pkl
-*.log
+*
