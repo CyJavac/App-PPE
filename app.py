@@ -1,44 +1,55 @@
 import streamlit as st
+import torch
 import numpy as np
+import cv2
 from PIL import Image
-from ultralytics import YOLO
 
 # Cargar el modelo
-model = YOLO('model/modelo_entrenado.pt')
+@st.cache_resource
+def load_model():
+    return torch.hub.load('ultralytics/yolov5', 'custom', path='model/modelo_entrenado.pt', force_reload=False)
 
-# Función para detectar PPE
-def detect_ppe(image):
-    # Ejecutar predicción directamente con la imagen PIL
-    results = model(image)  # Aquí está el cambio clave
+model = load_model()
+model.conf = 0.5  # confianza mínima
+
+# Clases esperadas
+expected_classes = {'casco', 'guantes', 'chaleco'}
+
+st.title("Detector de Equipos de Protección Personal")
+st.write("Sube una imagen o usa tu cámara para verificar si una persona tiene los EPP adecuados.")
+
+# Elegir fuente de imagen
+option = st.radio("Selecciona una opción:", ('Subir imagen', 'Usar cámara'))
+
+# Obtener imagen
+if option == 'Subir imagen':
+    uploaded_file = st.file_uploader("Elige una imagen", type=["jpg", "jpeg", "png"])
+    if uploaded_file:
+        image = Image.open(uploaded_file)
+elif option == 'Usar cámara':
+    camera_image = st.camera_input("Toma una foto")
+    if camera_image:
+        image = Image.open(camera_image)
+
+# Procesar imagen si hay una
+if 'image' in locals():
+    st.image(image, caption='Imagen cargada', use_container_width=True)
+
+    # Convertir imagen a formato compatible
+    img_array = np.array(image)
+    results = model(img_array)
+
+    # Mostrar resultados
+    results.render()
+    st.image(results.ims[0], caption="Resultado con detecciones", use_column_width=True)
 
     # Obtener clases detectadas
-    detected_classes = [model.names[int(cls)] for cls in results[0].boxes.cls.cpu().numpy()]
+    detected = set([model.names[int(x)] for x in results.xyxy[0][:, -1]])
+    st.write("Objetos detectados:", ", ".join(detected))
 
-    # PPE que esperamos detectar
-    etiquetas = ['persona', 'casco', 'guantes', 'chaleco']
-    detecciones = {etiqueta: (etiqueta in detected_classes) for etiqueta in etiquetas}
-
-    # Crear alerta
-    faltantes = [k for k, v in detecciones.items() if k != 'persona' and not v]
-    if faltantes:
-        alerta = f"⚠️ Alerta SISO: falta {' - '.join(faltantes)}"
+    # Verificar si falta alguna protección
+    missing = expected_classes - detected
+    if missing:
+        st.error(f"⚠️ Alerta SISO: Faltan los siguientes elementos de protección: {', '.join(missing)}")
     else:
-        alerta = "✅ Todo el equipo de protección está presente"
-
-    return {"detected": detecciones, "alert": alerta, "results": results}
-
-# Streamlit UI
-st.title('Detección de PPE en Imágenes')
-
-uploaded_file = st.file_uploader("Sube una imagen", type=["jpg", "jpeg", "png"])
-
-if uploaded_file:
-    image = Image.open(uploaded_file)
-    st.image(image, caption="Imagen cargada", use_container_width=True)
-
-    resultado = detect_ppe(image)
-
-    st.subheader("Resultado de la Detección")
-    st.write(resultado['alert'])
-    for item, presente in resultado['detected'].items():
-        st.write(f"{item}: {'✅' if presente else '❌'}")
+        st.success("✅ Todos los elementos de protección están presentes.")
