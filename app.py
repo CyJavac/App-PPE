@@ -6,7 +6,7 @@ from ultralytics import YOLO
 # Cargar modelo YOLOv8
 @st.cache_resource
 def load_model():
-    return YOLO("model/modelo.pt")
+    return YOLO("model/modelo_entrenado.pt")
 
 model = load_model()
 
