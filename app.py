@@ -1,31 +1,24 @@
 import streamlit as st
-import torch
 import numpy as np
-import cv2
 from PIL import Image
+from ultralytics import YOLO
 
-
-MODEL_PATH = 'model/modelo_entrenado.pt'
-
+# Cargar modelo YOLOv8
 @st.cache_resource
 def load_model():
-    return torch.hub.load('ultralytics/yolov5', 'custom', path=MODEL_PATH, force_reload=False)
+    return YOLO("model/modelo.pt")
 
 model = load_model()
-model.conf = 0.5  # confianza mínima
 
-# Clases esperadas
-expected_classes = {'casco', 'guantes', 'chaleco'}
+st.title("Detector de EPP con YOLOv8")
+st.write("Sube una imagen o usa la cámara para verificar el equipo de protección.")
 
-st.title("Detector de Equipos de Protección Personal")
-st.write("Sube una imagen o usa tu cámara para verificar si una persona tiene los EPP adecuados.")
+# Opciones: subir o tomar imagen
+option = st.radio("Selecciona fuente de imagen:", ('Subir imagen', 'Usar cámara'))
 
-# Elegir fuente de imagen
-option = st.radio("Selecciona una opción:", ('Subir imagen', 'Usar cámara'))
-
-# Obtener imagen
+image = None
 if option == 'Subir imagen':
-    uploaded_file = st.file_uploader("Elige una imagen", type=["jpg", "jpeg", "png"])
+    uploaded_file = st.file_uploader("Selecciona una imagen", type=["jpg", "jpeg", "png"])
     if uploaded_file:
         image = Image.open(uploaded_file)
 elif option == 'Usar cámara':
@@ -33,25 +26,28 @@ elif option == 'Usar cámara':
     if camera_image:
         image = Image.open(camera_image)
 
-# Procesar imagen si hay una
-if 'image' in locals():
-    st.image(image, caption='Imagen cargada', use_container_width=True)
+# Procesar imagen
+if image:
+    st.image(image, caption="Imagen cargada", use_column_width=True)
 
-    # Convertir imagen a formato compatible
-    img_array = np.array(image)
-    results = model(img_array)
+    # Ejecutar detección
+    results = model.predict(image)
 
-    # Mostrar resultados
-    results.render()
-    st.image(results.ims[0], caption="Resultado con detecciones", use_column_width=True)
+    # Mostrar resultados anotados
+    annotated = results[0].plot()
+    st.image(annotated, caption="Detecciones", use_container_width=True)
 
-    # Obtener clases detectadas
-    detected = set([model.names[int(x)] for x in results.xyxy[0][:, -1]])
-    st.write("Objetos detectados:", ", ".join(detected))
+    # Analizar clases detectadas
+    names = model.names
+    detections = [names[int(cls)] for cls in results[0].boxes.cls]
+    st.write("Objetos detectados:", ", ".join(set(detections)))
 
-    # Verificar si falta alguna protección
-    missing = expected_classes - detected
-    if missing:
-        st.error(f"⚠️ Alerta SISO: Faltan los siguientes elementos de protección: {', '.join(missing)}")
+    # Verificación de EPP
+    requeridos = {"casco", "guantes", "chaleco"}
+    detectados = set(detections)
+    faltantes = requeridos - detectados
+
+    if faltantes:
+        st.error(f"⚠️ Alerta SISO: Faltan los siguientes elementos: {', '.join(faltantes)}")
     else:
         st.success("✅ Todos los elementos de protección están presentes.")
