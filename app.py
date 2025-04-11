@@ -28,7 +28,7 @@ elif option == 'Usar cámara':
 
 # Procesar imagen
 if image:
-    st.image(image, caption="Imagen cargada", use_column_width=True)
+    st.image(image, caption="Imagen cargada", use_container_width=True)
 
     # Ejecutar detección
     results = model.predict(image)
