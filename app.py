@@ -6,11 +6,12 @@ from ultralytics import YOLO
 # Cargar modelo YOLOv8
 @st.cache_resource
 def load_model():
-    return YOLO("model/modelo_entrenado.pt")
+    return YOLO("model/best.pt")
 
 model = load_model()
 
-st.title("Detector de EPP con YOLOv8")
+st.title("Detector de PPE con YOLOv8")
+st.write("Creado por Carlos Javier Abaunza y Jhan Carlo Leon.")
 st.write("Sube una imagen o usa la cámara para verificar el equipo de protección.")
 
 # Opciones: subir o tomar imagen
