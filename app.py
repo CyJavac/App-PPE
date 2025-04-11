@@ -11,7 +11,7 @@ def load_model():
 model = load_model()
 
 st.title("Detector de PPE con YOLOv8")
-st.write("Creado por Carlos Javier Abaunza y Jhan Carlo Leon. Sube una imagen o usa la cámara para verificar el equipo de protección.")
+st.write("Creado por Carlos Javier Abaunza y Jhan Carlo Leon. \n Sube una imagen o usa la cámara para verificar el equipo de protección.")
 
 # Opciones: subir o tomar imagen
 option = st.radio("Selecciona fuente de imagen:", ('Subir imagen', 'Usar cámara'))
