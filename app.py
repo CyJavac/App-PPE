@@ -5,10 +5,10 @@ from ultralytics import YOLO
 
 # Cargar modelo YOLOv8
 @st.cache_resource
-#def load_model():
-    #return YOLO("model/best.pt")
+def load_model():
+    return YOLO("best.pt")
 
-#model = load_model()
+model = load_model()
 
 st.title("Detector de PPE con YOLOv8")
 st.write("Creado por Carlos Javier Abaunza y Jhan Carlo Leon. \n Sube una imagen o usa la cámara para verificar el equipo de protección.")
